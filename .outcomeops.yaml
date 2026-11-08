@@ -1,0 +1,40 @@
+# .outcomeops.yaml - OutcomeOps AI Assist repository configuration
+#
+# honojs/hono connected as the TypeScript reference/test repository for OutcomeOps:
+# validates TS code-maps + symbol-graph extraction end-to-end, and serves as the
+# verification target for the ADR-055 TypeScript cross-module resolver. Not a
+# code-gen target.
+
+version: "1.0"
+
+code_generation:
+  # Selects the TypeScript backend in analyze-pr (PR-Check) file scoping.
+  backend: "typescript"
+
+project_context: |
+  honojs/hono - a small, fast web framework written in TypeScript. The src/
+  tree has many internal modules (router, middleware, helper, client, utils,
+  validator) that cross-import via named exports, used here to exercise the
+  TypeScript symbol-graph extractor and the ADR-055 TypeScript resolver.
+
+testing:
+  framework: "vitest"
+  test_directory: "src"
+  min_coverage: 0
+
+ingestion:
+  symbol_graph:
+    enabled: true
+    # Extract TypeScript only (subset of registered languages).
+    languages: ["typescript"]
+    # Scope to the real library source; hono co-locates *.test.ts beside source
+    # and keeps build/benchmark/runtime-test TS out of src/. ADR-009 base
+    # excludes (node_modules, dist, ...) still apply on top of these.
+    include:
+      - "src/**/*.ts"
+      - "src/**/*.tsx"
+    exclude:
+      - "**/*.test.ts"
+      - "**/*.test.tsx"
+      - "**/*.spec.ts"
+    max_file_bytes: 524288  # 512 KiB
